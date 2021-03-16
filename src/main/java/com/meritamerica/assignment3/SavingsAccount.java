@@ -4,34 +4,34 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class SavingsAccount extends BankAccount {
-	private static double balance;
-	private static double interestRate = 0.0001;
-	private static Date date;
+class SavingsAccount extends BankAccount {
 	
+	public static final double INTEREST_RATE = 0.01;
 	
-	public SavingsAccount(double openingBalance, double interestRate) {
-		super(openingBalance, interestRate);
+	public SavingsAccount(double openBalance, double interestRate){
+		super(openBalance, interestRate);
 	}
 	
-	public SavingsAccount(long accountNumber, double openingBalance, double interestRate, Date date) {
-		super(accountNumber, openingBalance, interestRate, date);
+	public SavingsAccount (long accountNumber, double openBalance, double interestRate, Date accountOpenedOn) {
+		super(accountNumber, openBalance, interestRate, accountOpenedOn);
 	}
 	
-	public static SavingsAccount readFromString(String accountData) throws ParseException {
-		
-		SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/DD/YYYY");
-		
-			String[] CHA = accountData.split(",");
-		
-		long accountNumber = Long.parseLong(CHA[0]);
-		double balance = Double.parseDouble(CHA[1]);
-		double interestRate = Double.parseDouble(CHA[2]);
-		Date date = dateFormatter.parse(CHA[3]);
-		
-		SavingsAccount newSavingsAccountInfo = new SavingsAccount(accountNumber, balance, interestRate, date);
-		
-		return newSavingsAccountInfo;
-		
+	public String toString() {
+		return "Savings Account Balance: $" + balance + "\n" + 
+				"Savings Account Interest Rate: " + INTEREST_RATE + "\n" + 
+				"Savings Account Balance in 3 years: $" + futureValue(3);
+	
+	}
+	
+	public static SavingsAccount readFromString(String accountData)throws ParseException, NumberFormatException {
+    	String [] holding = accountData.split(",");
+    	SimpleDateFormat date = new SimpleDateFormat("dd/MM/yyyy");
+    	//[0] is accountNumber, [1] is balance, [2] is interestRate, date is [3] which is SimpleDate
+    	long accountNumber = Long.parseLong(holding[0]);
+    	double balance = Double.parseDouble(holding[1]);
+    	double interestRate = Double.parseDouble(holding[2]);
+    	Date accountOpenedOn = date.parse(holding[3]);
+
+    	return new SavingsAccount(accountNumber, balance, interestRate, accountOpenedOn);
 	}
 }

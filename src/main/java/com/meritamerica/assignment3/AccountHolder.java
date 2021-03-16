@@ -1,135 +1,93 @@
 package com.meritamerica.assignment3;
 
-import java.util.Arrays;
-import com.meritamerica.assignment3.CheckingAccount;
-import com.meritamerica.assignment3.SavingsAccount;
-
-public class AccountHolder {
-
+public class AccountHolder implements Comparable<AccountHolder>  {
+	
 	private String firstName;
 	private String middleName;
 	private String lastName;
 	private String ssn;
-	CheckingAccount[] checkingArray = new CheckingAccount[10];
-	SavingsAccount[] savingsArray = new SavingsAccount[10];
-	CDAccount[] CDAArray = new CDAccount[10];
-	private static final double CHECKINGFEE = 250000;
-
-	// Constructors
-	public AccountHolder(String firstName, String middleName, String lastName, String ssn) {
-
-		this.firstName = firstName;
-		this.middleName = middleName;
-		this.lastName = lastName;
+	CheckingAccount[] checkingArray = new CheckingAccount[0];
+	SavingsAccount[] savingsArray = new SavingsAccount[0];
+	CDAccount[] cdAccountArray = new CDAccount[0];
+	
+	public AccountHolder(String first, String middle, String last, String ssn) {
+		this.firstName = first;
+		this.middleName = middle;
+		this.lastName = last;
 		this.ssn = ssn;
 	}
 
-	// Account GETTERS and SETTERS
-
-	// First name setter & getter
-
-	protected void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	protected String getFirstName() {
-		return firstName;
-	}
-
-	// Middle name setter & getter
-
-	protected void setMiddleName(String middleName) {
-		this.middleName = middleName;
-	}
-
-	protected String getMiddleName() {
-		return middleName;
-	}
-
-	// Last name setter & getter
-
-	protected void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	protected String getLastName() {
-		return lastName;
-	}
-
-	// SSN setter & getter
-
-	protected void setSSN(String ssn) {
-		this.ssn = ssn;
-	}
-
-	protected String getSSN() {
-		return ssn;
-	}
-
-	public CheckingAccount addCheckingAccount(double openingBalance) {
-		if (getCombinedBalance() - getCDBalance() + openingBalance <= CHECKINGFEE) {
-			System.out.println("pass checking fee: ");
-			CheckingAccount cac = new CheckingAccount(openingBalance);
-			if (cac != null) {
-				System.out.println("Account created: ");
-				return addCheckingAccount(cac);
-			}
+	public CheckingAccount addCheckingAccount(double openBalance) {
+		if(getCheckingBalance() + getSavingsBalance() + openBalance >= 250000) {
+			System.out.println("Cannot open a new Checking Account because aggregate balance of accounts is to high.");
+			return null;
 		}
-		return null;
-	}
-
-	public CheckingAccount addCheckingAccount(CheckingAccount checkingAccount) {
-		if (getCombinedBalance() - getCDBalance() + checkingAccount.getBalance() <= CHECKINGFEE) {
-			System.out.println("Account fee acepted: ");
-			for (int i = 0; i < checkingArray.length; i++) {
-				if (checkingArray[i] == null) {
-					checkingArray[i] = checkingAccount;
-					System.out.println(checkingArray.length + " add checking account");
-					return checkingArray[i];
-				}
+		CheckingAccount newA = new CheckingAccount(openBalance, CheckingAccount.INTEREST_RATE);
+		CheckingAccount[] newCheckingArray = new CheckingAccount[checkingArray.length+1];
+			for (int i = 0; i < newCheckingArray.length - 1; i++) {
+				newCheckingArray[i] = checkingArray[i];
 			}
+		checkingArray = newCheckingArray;
+		checkingArray[checkingArray.length-1] = newA;
+		return newA;
+	}
+	
+	public boolean addCheckingAccount(CheckingAccount checkingAccount) {
+		try {
+		if(checkingAccount.getBalance() + getCheckingBalance() + getSavingsBalance() >= 250000) {
+			System.out.println("Cannot open a new Checking Account because aggregate balance of accounts is to high.");
+			return false;
 		}
-		return null;
-	}
-
-	public CheckingAccount[] getCheckingAccounts() {
-		return checkingArray;
-	}
-
-	public int getNumberOfCheckingAccount() {
-		return checkingArray.length;
-	}
+		CheckingAccount[] newCheckingArray = new CheckingAccount[checkingArray.length+1];
+			for (int i = 0; i < newCheckingArray.length-1; i++) {
+				newCheckingArray[i] = checkingArray[i];
+			}
+		checkingArray = newCheckingArray;
+		checkingArray[checkingArray.length-1] = checkingAccount;
+		return checkingAccount != null;
+		}
+		catch(NullPointerException e) {
+    		e.printStackTrace();
+    		return null != null;
+    	}
+	}	
 
 	public double getCheckingBalance() {
-		if (checkingArray != null) {
-			double checkingBalance = 0.0;
-			for (int i = 0; i < checkingArray.length; i++) {
-				if (checkingArray[i] != null) {
-					checkingBalance += checkingArray[i].getBalance();
-				}
+		double total = 0.0;
+		int i;
+			for(CheckingAccount balance: checkingArray) {
+				total += balance.getBalance();
 			}
-			return checkingBalance;
-		} else
-			return 0;
+		return total;
 	}
 
-	public SavingsAccount addSavingsAccount(double openingBalance) {
-		if (getCombinedBalance() - getCDBalance() + openingBalance <= CHECKINGFEE) {
-			return addSavingsAccount(new SavingsAccount(openingBalance));
+	public SavingsAccount addSavingsAccount(double openBalance) {
+		if(getCheckingBalance() + getSavingsBalance() + openBalance >= 250000) {
+			System.out.println("Cannot open a new Savings Account because aggregate balance of accounts is to high.");
+			return null;
+		}	
+		SavingsAccount newA = new SavingsAccount(openBalance, SavingsAccount.INTEREST_RATE);
+		SavingsAccount[] newSavingsArray = new SavingsAccount[savingsArray.length+1];
+		for (int i = 0; i < newSavingsArray.length-1; i++) {
+			newSavingsArray[i] = savingsArray[i];
 		}
-		return null;
+		savingsArray = newSavingsArray;
+		savingsArray[savingsArray.length-1] = newA;
+		return newA;
 	}
 
-	public SavingsAccount addSavingsAccount(SavingsAccount openingBalance) {
-		if (getCombinedBalance() - getCDBalance() + openingBalance.getBalance() <= CHECKINGFEE) {
-			for (int i = 0; i < savingsArray.length; i++) {
-				if (savingsArray[i] == null) {
-					savingsArray[i] = openingBalance;
-					break;
-				}
-			}
+	public SavingsAccount addSavingsAccount(SavingsAccount savingsAccount) {
+		if(savingsAccount.getBalance() + getCheckingBalance() + getSavingsBalance() >= 250000) {
+			System.out.println("Cannot open a new Savings Account because aggregate balance of accounts is to high.");
+			return null;
 		}
-		return null;
+		SavingsAccount[] newSavingsArray = new SavingsAccount[savingsArray.length+1];
+			for (int i = 0; i < newSavingsArray.length-1; i++) {
+			       newSavingsArray[i] = savingsArray[i];
+			}
+		savingsArray = newSavingsArray;
+		savingsArray[savingsArray.length-1] = savingsAccount;
+		return savingsAccount;
 	}
 
 	public SavingsAccount[] getSavingsAccounts() {
@@ -141,60 +99,123 @@ public class AccountHolder {
 	}
 
 	public double getSavingsBalance() {
-		if (savingsArray != null) {
-			double savingsBalance = 0.0;
-			for (int i = 0; i < savingsArray.length; i++) {
-				if (savingsArray[i] != null) {
-					savingsBalance += savingsArray[i].getBalance();
-				}
+		double total = 0.0;
+			for(SavingsAccount balance : savingsArray) {
+				total += balance.getBalance();
 			}
-			return savingsBalance;
-		}
-		return 0;
-	}
+		return total;
 
-	public CDAccount addCDAccount(CDOffering offering, double openingBalance) {
-		if (MeritBank.getCDOfferings() != null) {
-			return addCDAccount(new CDAccount(offering, openingBalance));
-		}
-		return null;
 	}
-
+	
+	public CDAccount addCDAccount(CDOffering offering, double openBalance) {
+		CDAccount newA = new CDAccount(offering, openBalance);
+		CDAccount[] newCDArray = new CDAccount[cdAccountArray.length+1];
+			for (int i = 0; i < newCDArray.length-1; i++) {
+				newCDArray[i] = cdAccountArray[i];
+			}
+		cdAccountArray = newCDArray;
+		cdAccountArray[cdAccountArray.length-1] = newA;
+		return newA;
+	}
+	
 	public CDAccount addCDAccount(CDAccount cdAccount) {
-		for (int i = 0; i < CDAArray.length; i++) {
-			if (CDAArray[i] == null) {
-				CDAArray[i] = cdAccount;
-				return cdAccount;
+		CDAccount[] newCDArray = new CDAccount[cdAccountArray.length+1];
+			for (int i = 0; i < newCDArray.length-1; i++) {
+			       newCDArray[i] = cdAccountArray[i];
 			}
-		}
-
-		return null;
+		cdAccountArray = newCDArray;
+		cdAccountArray[cdAccountArray.length-1] = cdAccount;
+		return cdAccount;
 	}
 
 	public CDAccount[] getCDAccounts() {
-		return CDAArray;
+		return cdAccountArray;
 	}
 
 	public int getNumberOfCDAccounts() {
-		return CDAArray.length;
+		return cdAccountArray.length;
 	}
 
 	public double getCDBalance() {
-		if (CDAArray != null) {
-			double CDBalance = 0.0;
-			for (int i = 0; i < CDAArray.length; i++) {
-				if (CDAArray[i] != null) {
-					CDBalance += CDAArray[i].getBalance();
-				}
+		double total = 0.0;
+			for(CDAccount balance : cdAccountArray) {
+				total += balance.getBalance();
 			}
-			return CDBalance;
-		}
-		return 0;
+		return total;
 	}
 
 	public double getCombinedBalance() {
-		double res = getCheckingBalance() + getSavingsBalance() + getCDBalance();
-		System.out.println(res);
-		return res;
+		return getCDBalance() + getSavingsBalance() + getCheckingBalance();
 	}
+	
+	@Override
+	public int compareTo(AccountHolder account) {
+		if(this.getCombinedBalance() > account.getCombinedBalance()) {
+			return 1;
+		} else {
+			return -1;
+		}
+	}
+	
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String first) {
+		this.firstName = first;
+	}
+	
+	public String getMiddleName() {
+		return middleName;
+	}
+	
+	public void setMiddleName(String middle) {
+		this.middleName = middle;
+	}
+	
+	public String getLastName() {
+		return lastName;
+	}
+	
+	public void setLastName(String last) {
+		this.lastName = last;
+	}
+	
+	public String getSSN() {
+		return ssn;
+	}
+	
+	public void setSSN(String ssn) {
+		this.ssn = ssn;
+	}
+	
+	public CheckingAccount[] getCheckingAccounts() {
+		return checkingArray;
+	}
+	
+	public int getNumberOfCheckingAccounts() {
+		return checkingArray.length;
+	}
+	
+	public String writeToString() {
+    	StringBuilder accountHolderData = new StringBuilder();
+    	accountHolderData.append(firstName).append(",");
+    	accountHolderData.append(middleName).append(",");
+    	accountHolderData.append(lastName).append(",");
+    	accountHolderData.append(ssn);
+    	return accountHolderData.toString();
+    }
+
+	public static AccountHolder readFromString(String accountHolderData) {
+	    String[] holding = accountHolderData.split(",");
+	    String firstName = holding[0];
+	    String middleName = holding[1];
+	    String lastName = holding[2];
+	    String ssn = holding[3];	
+	    return new AccountHolder(firstName, middleName, lastName, ssn);
+	}
+	public String toString() {
+		return  "Combined Balance for Account Holder" + this.getCombinedBalance();	
+	}
+		
 }
